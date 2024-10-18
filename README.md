@@ -1,4 +1,4 @@
-# Hack_coronary-heart-disease
+# Hack_heart-disease
 
 Developer: HeartTech Pioneers
 
