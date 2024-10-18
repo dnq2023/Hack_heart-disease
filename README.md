@@ -6,6 +6,8 @@ Detect coronary heart disease using PCG and ECG
 
 "HeartWave" is the main function(You can divide some subfunction out from it to make it simplified)
 
-
+****** IMPORTANT!!
+IF YOU WANT TO SUBMIT YOUR CODE, PLS OPEN A NEW BRANCH!!!!
+******
 
 just ignore the "main_model"
