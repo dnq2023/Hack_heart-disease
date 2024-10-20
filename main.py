@@ -1,7 +1,7 @@
 import seaborn as sns
 from sklearn.model_selection import train_test_split
 import tensorflow as tf
-from models import train_cls_model, InceptionModel
+from models import CLSModel, InceptionModel
 from dataset import PNCC
 from utils import plot_confusion_matrix
 
@@ -21,7 +21,7 @@ def main():
     combine_train, combine_test, labels_train, labels_test = train_test_split(combine, labels, test_size=0.3, random_state=42)
     mel_train, mel_test = train_test_split(mel, test_size=0.3, random_state=42)
 
-    cls_model, labels_pred_cls = train_cls_model(combine_train, labels_train, combine_test, labels_test)
+    cls_model, labels_pred_cls = CLSModel().train(combine_train, labels_train, combine_test, labels_test)
 
     input_shape = (224, 224, 3)  # Input for InceptionV3
     inception_model = InceptionModel(input_shape)

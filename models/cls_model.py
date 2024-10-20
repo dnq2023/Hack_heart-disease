@@ -1,10 +1,16 @@
+from .model import Model
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
 
 
-def train_cls_model(train_data, train_label, test_data, test_label):
-    rf = RandomForestClassifier(n_estimators=100)
-    rf.fit(train_data, train_label)
-    rf_pred = rf.predict(test_data)
-    print('Random Forest Accuracy:', accuracy_score(test_label, rf_pred))
-    return rf, rf_pred
+class CLSModel(Model):
+    def __init__(self) -> None:
+        super().__init__()
+        self.model = RandomForestClassifier(n_estimators=100)
+
+
+    def train(self, train_data, train_label, test_data, test_label):
+        self.model.fit(train_data, train_label)
+        predict = self.model.predict(test_data)
+        print('Random Forest Accuracy:', accuracy_score(test_label, predict))
+        return self.model, predict
