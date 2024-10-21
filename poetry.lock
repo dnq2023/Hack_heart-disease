@@ -3533,6 +3533,23 @@ sftp = ["paramiko (>=2.7.0)"]
 xxhash = ["xxhash (>=1.4.3)"]
 
 [[package]]
+name = "prettytable"
+version = "3.11.0"
+description = "A simple Python library for easily displaying tabular data in a visually appealing ASCII table format"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "prettytable-3.11.0-py3-none-any.whl", hash = "sha256:aa17083feb6c71da11a68b2c213b04675c4af4ce9c541762632ca3f2cb3546dd"},
+    {file = "prettytable-3.11.0.tar.gz", hash = "sha256:7e23ca1e68bbfd06ba8de98bf553bf3493264c96d5e8a615c0471025deeba722"},
+]
+
+[package.dependencies]
+wcwidth = "*"
+
+[package.extras]
+tests = ["pytest", "pytest-cov", "pytest-lazy-fixtures"]
+
+[[package]]
 name = "prometheus-client"
 version = "0.17.0"
 description = "Python client for the Prometheus monitoring system."
@@ -4999,46 +5016,6 @@ wrapt = ">=1.11.0"
 and-cuda = ["nvidia-cublas-cu12 (==12.3.4.1)", "nvidia-cuda-cupti-cu12 (==12.3.101)", "nvidia-cuda-nvcc-cu12 (==12.3.107)", "nvidia-cuda-nvrtc-cu12 (==12.3.107)", "nvidia-cuda-runtime-cu12 (==12.3.101)", "nvidia-cudnn-cu12 (==8.9.7.29)", "nvidia-cufft-cu12 (==11.0.12.1)", "nvidia-curand-cu12 (==10.3.4.107)", "nvidia-cusolver-cu12 (==11.5.4.101)", "nvidia-cusparse-cu12 (==12.2.0.103)", "nvidia-nccl-cu12 (==2.19.3)", "nvidia-nvjitlink-cu12 (==12.3.101)"]
 
 [[package]]
-name = "tensorflow-intel"
-version = "2.17.0"
-description = "TensorFlow is an open source machine learning framework for everyone."
-optional = false
-python-versions = ">=3.9"
-files = [
-    {file = "tensorflow_intel-2.17.0-cp310-cp310-win_amd64.whl", hash = "sha256:f61144e1dc8d19971a6765d35c29c61b9582eb767606613cbc383926ecb0f002"},
-    {file = "tensorflow_intel-2.17.0-cp311-cp311-win_amd64.whl", hash = "sha256:3f13d4f82e8ca7a217b2e8ff98ce5e396a68cfce9607a13d31c9ba0ce66ba5ce"},
-    {file = "tensorflow_intel-2.17.0-cp312-cp312-win_amd64.whl", hash = "sha256:6a642d9a3d6b839334c6161d88606130e28070009c82fd3e6646c1b5bc94b7a0"},
-    {file = "tensorflow_intel-2.17.0-cp39-cp39-win_amd64.whl", hash = "sha256:dab3df5dcef58c3828dc82328e8d343d77f4676aca8f7371e3033ac177c37074"},
-]
-
-[package.dependencies]
-absl-py = ">=1.0.0"
-astunparse = ">=1.6.0"
-flatbuffers = ">=24.3.25"
-gast = ">=0.2.1,<0.5.0 || >0.5.0,<0.5.1 || >0.5.1,<0.5.2 || >0.5.2"
-google-pasta = ">=0.1.1"
-grpcio = ">=1.24.3,<2.0"
-h5py = ">=3.10.0"
-keras = ">=3.2.0"
-libclang = ">=13.0.0"
-ml-dtypes = ">=0.3.1,<0.5.0"
-numpy = {version = ">=1.23.5,<2.0.0", markers = "python_version <= \"3.11\""}
-opt-einsum = ">=2.3.2"
-packaging = "*"
-protobuf = ">=3.20.3,<4.21.0 || >4.21.0,<4.21.1 || >4.21.1,<4.21.2 || >4.21.2,<4.21.3 || >4.21.3,<4.21.4 || >4.21.4,<4.21.5 || >4.21.5,<5.0.0dev"
-requests = ">=2.21.0,<3"
-setuptools = "*"
-six = ">=1.12.0"
-tensorboard = ">=2.17,<2.18"
-tensorflow-io-gcs-filesystem = {version = ">=0.23.1", markers = "python_version < \"3.12\""}
-termcolor = ">=1.1.0"
-typing-extensions = ">=3.6.6"
-wrapt = ">=1.11.0"
-
-[package.extras]
-and-cuda = ["nvidia-cublas-cu12 (==12.3.4.1)", "nvidia-cuda-cupti-cu12 (==12.3.101)", "nvidia-cuda-nvcc-cu12 (==12.3.107)", "nvidia-cuda-nvrtc-cu12 (==12.3.107)", "nvidia-cuda-runtime-cu12 (==12.3.101)", "nvidia-cudnn-cu12 (==8.9.7.29)", "nvidia-cufft-cu12 (==11.0.12.1)", "nvidia-curand-cu12 (==10.3.4.107)", "nvidia-cusolver-cu12 (==11.5.4.101)", "nvidia-cusparse-cu12 (==12.2.0.103)", "nvidia-nccl-cu12 (==2.19.3)", "nvidia-nvjitlink-cu12 (==12.3.101)"]
-
-[[package]]
 name = "tensorflow-io-gcs-filesystem"
 version = "0.31.0"
 description = "TensorFlow IO"
@@ -5996,4 +5973,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.11,<3.12"
-content-hash = "ee1040df0a5d79633a37a9b4a7bb91cf7b0e36f7a68666692701873a51646981"
+content-hash = "70281a4e1211342b79b8959128aa9d12a162392b568a115fa465d783ef6d539f"

@@ -5,7 +5,8 @@ import numpy as np
 import pywt
 import librosa
 import pandas as pd
-
+from .ecg_processor import ECGProcessor
+from .pcg_processor import PCGProcessor
 
 class PNCC():
 
@@ -82,10 +83,10 @@ class PNCC():
         labels_file = pd.read_csv(os.path.join(self.data_path, 'REFERENCE-SQI.csv'), header=None,
                                 names=['record_name', 'label', 'reliability'])
 
-
         # Data loading and feature extraction
-        combine = []
-        mel = []  # For storing Mel spectrograms
+        ecg_data = []
+        combined_pcg_mel = []  # For storing combined PCG features and Mel spectrograms
+        mel = []
         labels = []
         for idx, (wav_file, dat_file) in enumerate(zip(wav_files, dat_files)):
             record_name = wav_file.split('.')[0]
@@ -94,20 +95,28 @@ class PNCC():
             # Check data reliability
             if not record_info.empty and record_info['reliability'].values[0] == 1:
                 label = record_info['label'].values[0]
-                pcg_mel_spectrogram = self.extract_pcg_mel_spectrogram(wav_file)  # Extract PCG Mel spectrogram
-                ecg_features = self.extract_ecg_features(dat_file)
-                pcg_features = self.extract_pcg_features(wav_file)
+                
+                try:
+                    ecg_features = self.extract_ecg_features(dat_file)
+                    pcg_mel_spectrogram = self.extract_pcg_mel_spectrogram(wav_file)  # Extract PCG Mel spectrogram
+                    pcg_features = self.extract_pcg_features(wav_file)
+                    combined_features = np.hstack([pcg_features, [np.mean(pcg_mel_spectrogram)]])
+                    # np.concatenate((pcg_features, np.mean(pcg_mel_spectrogram)), axis=0)
+                except Exception as e:
+                    print(f"Error processing data for {dat_file} or {wav_file}: {e}")
+                    continue  # Skip this record if any processing fails
 
-                combined_features = np.hstack([np.mean(pcg_mel_spectrogram), ecg_features])  # Simplify features for simple model
-                combine.append(combined_features)
+                ecg_data.append(ecg_features)
+                combined_pcg_mel.append(combined_features)
                 mel.append(np.stack([np.resize(pcg_mel_spectrogram, (224, 224))]*3, axis=-1))  # Reshape to 224x224x3 format
                 labels.append(1 if label == 1 else 0)
 
         # Convert to arrays
-        combine = np.array(combine)
+        ecg_data = np.array(ecg_data)
+        combined_pcg_mel = np.array(combined_pcg_mel)
         mel = np.array(mel)
         labels = np.array(labels)
-        return combine, mel, labels
+        return ecg_data, combined_pcg_mel, mel, labels
 
 ##################
 # The default sr is not the same for the 2 pcg functions 
