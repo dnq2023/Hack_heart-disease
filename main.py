@@ -1,5 +1,10 @@
 import seaborn as sns
 from sklearn.model_selection import train_test_split
+
+# ## Disable oneDNN optimization on intel 
+# import os
+# os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
+
 import tensorflow as tf
 from models import CLSModel, InceptionModel
 from dataset import PNCC
@@ -7,11 +12,16 @@ from utils import plot_confusion_matrix
 
 def main():
     gpus = tf.config.list_physical_devices('GPU')
+    # Check if there are any GPUs available
     if not gpus:
-        tf.config.set_visible_devices(gpus[0],'GPU')
+        print("No GPUs found. Using CPU.")
+    else:
+        # If GPUs are available, set the first GPU as visible
+        tf.config.set_visible_devices(gpus[0], 'GPU')
+        print(f"Using GPU: {gpus[0]}")
 
     # Set seaborn style
-    sns.set(style="darkgrid")
+    sns.set_style(style="darkgrid")
 
     # Set data path
     data_path = 'training-a'
