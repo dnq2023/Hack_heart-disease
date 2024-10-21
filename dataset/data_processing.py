@@ -109,3 +109,6 @@ class PNCC():
         labels = np.array(labels)
         return combine, mel, labels
 
+##################
+# The default sr is not the same for the 2 pcg functions 
+# the pcg features are not used for training
