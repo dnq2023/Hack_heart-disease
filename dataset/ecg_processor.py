@@ -35,6 +35,8 @@ class ECGProcessor:
     def detect_pqrst_waves(self):
         out = biosppy.signals.ecg.ecg(signal=self.ecg_signal, sampling_rate=self.sampling_rate, show=False)
         self.r_peaks = out['rpeaks']
+        if len(self.r_peaks) < 2:
+            raise ValueError("Not enough beats to compute heart rate.")
         self.pqrst_waves = [self.ecg_signal[max(0, r - int(0.2 * self.sampling_rate)):min(len(self.ecg_signal), r + int(0.4 * self.sampling_rate))] for r in self.r_peaks]
 
     def compute_average_pqrst_wave(self):
@@ -74,7 +76,6 @@ class ECGProcessor:
         return np.sqrt(np.mean(diff_rr_intervals**2)) if diff_rr_intervals.size > 0 else 0
 
     def extract_features(self):
-
         features = {
             'number_of_r_peaks': self.compute_r_peak_count(),
             'average_rr_interval': self.compute_average_rr_interval(),
@@ -85,9 +86,10 @@ class ECGProcessor:
             'rmssd': self.compute_rmssd()
         }
 
-        feature_values = np.array(list(features.values()))
-        
-        return features, feature_values
+        feature_keys = list(features.keys())
+        feature_values = list(features.values())
+
+        return feature_keys, feature_values
 
 
 if __name__ == '__main__':

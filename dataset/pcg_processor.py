@@ -27,9 +27,10 @@ class PCGProcessor:
         features['spectral_rolloff'] = self.compute_spectral_rolloff()
         features['chroma_stft'] = self.compute_chroma_stft()
         
+        feature_keys = list(features.keys())
         feature_values = np.array(list(features.values()))
         
-        return features, feature_values
+        return feature_keys, feature_values
 
     def compute_mfccs(self, n_mfcc=13):
         mfccs = librosa.feature.mfcc(y=self.pcg_signal, sr=self.sampling_rate, n_mfcc=n_mfcc)
