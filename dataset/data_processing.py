@@ -5,6 +5,7 @@ import numpy as np
 import pywt
 import librosa
 import pandas as pd
+from scipy.ndimage import zoom
 from .ecg_processor import ECGProcessor
 from .pcg_processor import PCGProcessor
 
@@ -49,6 +50,22 @@ class PNCC():
         std_ecg = np.std(ecg_filtered)
         return np.array([mean_ecg, std_ecg, np.mean(diff_ecg), np.std(diff_ecg)])
 
+
+    def extract_ecg_mel_spectrogram(self, dat_file, fs=1000):
+        record = wfdb.rdrecord(os.path.join(self.data_path, dat_file.split('.')[0]))
+        ecg_signal = record.p_signal[:, 0]
+        ecg_signal = np.nan_to_num(ecg_signal, nan=0.0, posinf=0.0, neginf=0.0)
+
+        n_fft = 1024 
+        hop_length = 512
+        n_mels = 128
+
+        mel_spectrogram = librosa.feature.melspectrogram(y=ecg_signal, sr=fs, n_fft=n_fft, hop_length=hop_length, n_mels=n_mels)
+
+        log_mel_spectrogram = librosa.power_to_db(mel_spectrogram, ref=np.max)
+        return log_mel_spectrogram
+
+
     # Extract PCG signal features using wavelet transform and Hilbert transform
     def extract_pcg_features(self, wav_file, sr=1000):
         wav_data, _ = librosa.load(os.path.join(self.data_path, wav_file), sr=sr)
@@ -86,7 +103,8 @@ class PNCC():
         # Data loading and feature extraction
         ecg_data = []
         combined_pcg_mel = []  # For storing combined PCG features and Mel spectrograms
-        mel = []
+        ecg_mel = []
+        pcg_mel = []
         labels = []
         for idx, (wav_file, dat_file) in enumerate(zip(wav_files, dat_files)):
             record_name = wav_file.split('.')[0]
@@ -99,6 +117,7 @@ class PNCC():
                 try:
                     ecg_features = self.extract_ecg_features(dat_file)
                     pcg_mel_spectrogram = self.extract_pcg_mel_spectrogram(wav_file)  # Extract PCG Mel spectrogram
+                    ecg_mel_spectrogram = self.extract_ecg_mel_spectrogram(dat_file)  # Extract ECG Mel spectrogram
                     pcg_features = self.extract_pcg_features(wav_file)
                     combined_features = np.hstack([pcg_features, [np.mean(pcg_mel_spectrogram)]])
                     # np.concatenate((pcg_features, np.mean(pcg_mel_spectrogram)), axis=0)
@@ -108,15 +127,17 @@ class PNCC():
 
                 ecg_data.append(ecg_features)
                 combined_pcg_mel.append(combined_features)
-                mel.append(np.stack([np.resize(pcg_mel_spectrogram, (224, 224))]*3, axis=-1))  # Reshape to 224x224x3 format
+                ecg_mel.append(np.resize(ecg_mel_spectrogram, (224, 224)))  # Reshape to 224x224x3 format
+                pcg_mel.append(np.resize(pcg_mel_spectrogram, (224, 224)))  # Reshape to 224x224x3 format
                 labels.append(1 if label == 1 else 0)
 
         # Convert to arrays
         ecg_data = np.array(ecg_data)
         combined_pcg_mel = np.array(combined_pcg_mel)
-        mel = np.array(mel)
+        ecg_mel = np.array(ecg_mel)
+        pcg_mel = np.array(pcg_mel)
         labels = np.array(labels)
-        return ecg_data, combined_pcg_mel, mel, labels
+        return ecg_data, combined_pcg_mel, ecg_mel, pcg_mel, labels
 
 ##################
 # The default sr is not the same for the 2 pcg functions 

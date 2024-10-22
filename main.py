@@ -27,7 +27,7 @@ def setup_gpu():
         print(f"Using GPU: {gpus[0]}")
 
 def process_data(data_path):
-    ecg_data, combined_pcg_mel, mel, labels = PNCC(data_path).data_process()
+    ecg_data, combined_pcg_mel, ecg_mel, pcg_mel, labels = PNCC(data_path).data_process()
     
     # Create a random shuffled array with test size = 30%
     indices = np.arange(len(labels))
@@ -38,20 +38,23 @@ def process_data(data_path):
     ecg_test = ecg_data[test_indices]
     pcg_train = combined_pcg_mel[train_indices]
     pcg_test = combined_pcg_mel[test_indices]
-    mel_train = mel[train_indices]
-    mel_test = mel[test_indices]
+
+    ecg_mel_train = ecg_mel[train_indices]
+    ecg_mel_test = ecg_mel[test_indices]
+    pcg_mel_train = pcg_mel[train_indices]
+    pcg_mel_test = pcg_mel[test_indices]
     labels_train = labels[train_indices]
     labels_test = labels[test_indices]
     
-    return ecg_train, ecg_test, pcg_train, pcg_test, mel_train, mel_test, labels_train, labels_test
+    return ecg_train, ecg_test, pcg_train, pcg_test, ecg_mel_train, ecg_mel_test, pcg_mel_train, pcg_mel_test, labels_train, labels_test
 def train_model(model_class, train_data, labels_train, test_data, labels_test):
     model_instance = model_class()
     model, labels_pred = model_instance.train(train_data, labels_train, test_data, labels_test)
     return model, labels_pred
 
-def train_inception_model(mel_train, labels_train, mel_test, labels_test):
+def train_inception_model(pcg_mel_train, labels_train, pcg_mel_test, labels_test):
     inception_model = InceptionModel()
-    labels_pred_deep = inception_model.train(mel_train, labels_train, mel_test, labels_test)
+    labels_pred_deep = inception_model.train(pcg_mel_train, labels_train, pcg_mel_test, labels_test)
     return inception_model, labels_pred_deep
 
 
@@ -79,13 +82,22 @@ def main():
     setup_gpu()
     sns.set_style(style="darkgrid")
     data_path = 'training-a'
-    ecg_train, ecg_test, pcg_train, pcg_test, mel_train, mel_test, labels_train, labels_test = process_data(data_path)
+    ecg_train, ecg_test, pcg_train, pcg_test, ecg_mel_train, ecg_mel_test, pcg_mel_train, pcg_mel_test, labels_train, labels_test = process_data(data_path)
 
     # Replace any NaN values with the mean of the respective columns
     ecg_train = np.nan_to_num(ecg_train, nan=np.nanmean(ecg_train))
     ecg_test = np.nan_to_num(ecg_test, nan=np.nanmean(ecg_test))
     pcg_train = np.nan_to_num(pcg_train, nan=np.nanmean(pcg_train))
     pcg_test = np.nan_to_num(pcg_test, nan=np.nanmean(pcg_test))
+
+    ecg_spec_train = np.stack([ecg_mel_train, ecg_mel_train, ecg_mel_train], axis=-1)
+    ecg_spec_test = np.stack([ecg_mel_test, ecg_mel_test, ecg_mel_test], axis=-1)
+    pcg_spec_train = np.stack([pcg_mel_train, pcg_mel_train, pcg_mel_train], axis=-1)
+    pcg_spec_test = np.stack([pcg_mel_test, pcg_mel_test, pcg_mel_test], axis=-1)
+    eepcg_spec_train = np.stack([ecg_mel_train, ecg_mel_train, pcg_mel_train], axis=-1)
+    eepcg_spec_test = np.stack([ecg_mel_test, ecg_mel_test, pcg_mel_test], axis=-1)
+    eppcg_spec_train = np.stack([ecg_mel_train, pcg_mel_train, pcg_mel_train], axis=-1)
+    eppcg_spec_test = np.stack([ecg_mel_test, pcg_mel_test, pcg_mel_test], axis=-1)
 
     # Open a file to write the accuracies
     with open('model_accuracies.csv', 'a') as f:
@@ -95,6 +107,7 @@ def main():
         # Training for ECG only with RandomForest
         train_and_evaluate("DeepModel (ECG only)", DeepModel, ecg_train, labels_train, ecg_test, labels_test, f)
         train_and_evaluate("RandomForest (ECG only)", CLSModel, ecg_train, labels_train, ecg_test, labels_test, f)
+        train_and_evaluate("InceptionModel (ECG only)", InceptionModel, ecg_spec_train, labels_train, ecg_spec_test, labels_test, f)
 
         # # Training for ECG only with Logistic
         # train_and_evaluate("Logistic (ECG only)", LogisticModel, ecg_train, labels_train, ecg_test, labels_test, f)
@@ -105,6 +118,7 @@ def main():
         # Training for PCG only with RandomForest
         train_and_evaluate("DeepModel (PCG only)", DeepModel, pcg_train, labels_train, pcg_test, labels_test, f)
         train_and_evaluate("RandomForest (PCG only)", CLSModel, pcg_train, labels_train, pcg_test, labels_test, f)
+        train_and_evaluate("InceptionModel (PCG only)", InceptionModel, pcg_spec_train, labels_train, pcg_spec_test, labels_test, f)
 
         # # Training for PCG only with Logistic
         # train_and_evaluate("Logistic (PCG only)", LogisticModel, pcg_train, labels_train, pcg_test, labels_test, f)
@@ -119,6 +133,9 @@ def main():
         # Training for both ECG and PCG with RandomForest
         train_and_evaluate("DeepModel (ECG + PCG)", DeepModel, combine_train, labels_train, combine_test, labels_test, f)
         train_and_evaluate("RandomForest (ECG + PCG)", CLSModel, combine_train, labels_train, combine_test, labels_test, f)
+
+        train_and_evaluate("InceptionModel (2ECG + PCG)", InceptionModel, eepcg_spec_train, labels_train, eepcg_spec_test, labels_test, f)
+        train_and_evaluate("InceptionModel (ECG + 2PCG)", InceptionModel, eppcg_spec_train, labels_train, eppcg_spec_test, labels_test, f)
 
         # # Training for both ECG and PCG with Logistic
         # train_and_evaluate("Logistic (ECG + PCG)", LogisticModel, combine_train, labels_train, combine_test, labels_test, f)
